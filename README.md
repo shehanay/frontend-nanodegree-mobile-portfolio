@@ -37,6 +37,8 @@ double click on index.html
 
 5- replace querySelector with getElementById and getElementsByClassName.
 
+6- declare some of the variables outside for loops  
+
 #### How To Run it:
 1- Go to project folder -> views folder -> open pizza.html
 
