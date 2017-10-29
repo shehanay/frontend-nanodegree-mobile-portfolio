@@ -35,7 +35,7 @@ double click on index.html
 
 4- Updated querySelectorAll("#mover") to getElementsByClassName("mover") so it doesn't have to recalculate on every iteration.
 
-5- replace querySelector with getElementById.
+5- replace querySelector with getElementById and getElementsByClassName.
 
 #### How To Run it:
 1- Go to project folder -> views folder -> open pizza.html

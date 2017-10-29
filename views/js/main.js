@@ -489,29 +489,14 @@ function logAverageFrame(times) { // times is the array of User Timing measureme
   console.log("Average scripting time to generate last 10 frames: " + sum / 10 + "ms");
 }
 
-// The following code for sliding background pizzas was pulled from Ilya's demo found at:
-// https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
-// Moves the sliding background pizzas based on scroll position
-
-// Optimization1: using getElementByClass() for mover class instead of querySelectorAll() to improve FPS on scroll because
-// querySelectorAll returns a static NodeList (gets all tags, classes even when we don't need them),
-// while getElementByClass() returns a live NodeList (gets only what we need at X moment/situation)
-// https://www.nczonline.net/blog/2010/09/28/why-is-getelementsbytagname-faster-that-queryselectorall/
-// Optimization2: created variable items outside of updatePositions() function so it doesn't need to be invoked on every scroll
 var items = document.getElementsByClassName('mover');
 
-// Optimization5: creating variable outside of updatePositions() function so styleChange reads it beforehand and doesn't
-// create unnecessary layout iterations
-// READ: https://developers.google.com/web/fundamentals/performance/rendering/avoid-large-complex-layouts-and-layout-thrashing#avoid-forced-synchronous-layouts
 
-// Moves the sliding background pizzas based on scroll position
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  // Optimization3: created new variable outside of for loop to decrease access to items variable everytime the for loop runs
-  // saves minimum loading, scrolling time. Barely visible in the browser.
   var cachedItems = items.length;
   var scrollNow = document.body.scrollTop / 1250;
 
