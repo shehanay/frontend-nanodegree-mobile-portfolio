@@ -421,50 +421,36 @@ var resizePizzas = function(size) {
 
   changeSliderLabel(size);
 
-   // Returns the size difference to change a pizza element from one size to another. Called by changePizzaSlices(size).
-  function determineDx(elem, size) {
-    // removed the var oldWidth = elem.offsetWidth and combined it into the return statement for a microoptimization;
-    var windowWidth = document.querySelector("#randomPizzas").offsetWidth;
-    // removed the var oldSize = oldWidth / windowWidth and combined it into the return statement for ANOTHER microoptimization;
-
-    // Changes the slider value to a percent width
-    function sizeSwitcher(size) {
-      switch (size) {
-        case "1":
-          return 0.25;
-        case "2":
-          return 0.3333;
-        case "3":
-          return 0.5;
-        default:
-          console.log("bug in sizeSwitcher");
-      }
-    }
-
-    /* removed the var newSize = sizeSwitcher(size) and combined it into the return statement for ANOTHER microoptimization;
-     removed the var dx = (newSize - oldSize) * windowWidth and combined it into the return statement for ANOTHER microoptimization;
-     finally the resulting return statement only relies on the declaration of one variable above - windowWidth - which I kept in because
-     it's referenced multiple times.
-     */
-    return (sizeSwitcher(size) - (elem.offsetWidth / windowWidth)) * windowWidth;
-  }
+  changeSliderLabel(size);
 
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
-    /* took the dx and newwidth variable assignments out of the loop because they only need to be
-     executed once per call of changePizzaSlices() function since they will be the same values for all pizza images.
-     also replaced querySelector with getElementsByClassName since the latter incurs less cost in terms of
-     browser speed - based on http://web.archive.org/web/20160108040024/http://jsperf.com/getelementbyid-vs-queryselector (page is currently
-      inaccessible)
-    */
-    var dx = determineDx(document.getElementsByClassName("randomPizzaContainer")[0], size);
-    var newwidth = (document.getElementsByClassName("randomPizzaContainer")[0].offsetWidth + dx) + 'px';
-    for (var i = 0; i < document.getElementsByClassName("randomPizzaContainer").length; i++) {
-      // the new loop now only contains one style element change for each loop, trastically cutting down jank.
-      document.getElementsByClassName("randomPizzaContainer")[i].style.width = newwidth;
+      // created variable newWidth to hold
+      var newWidth;
+      // added switch for when person uses slider. Everytime person resizes, pizza sizes (width) will change according to small (25%), medium (33.33%), or big (50%)
+      switch(size) {
+        case "1":
+          newWidth = 25;
+          break;
+        case "2":
+          newWidth = 33.33;
+          break;
+        case "3":
+          newWidth = 50;
+          break;
+        default:
+          console.log("bug in sizeSwitcher");
+        }
+    
+    // Created variable outside of For Loop so repeated calculations don't happen every time it loops (saves time). Changed querySelectAll() to getElementsByClassName
+    var randomPizzaContainers = document.getElementsByClassName("randomPizzaContainer");
+    // Created var length, which contains var randomPizzaContainers.length
+    var length = randomPizzaContainers.length;
+    // For Loop loops through every "randomPizzaContainer" class and changes width when person uses slider
+    for (var i = 0; i < length; i++) {
+      randomPizzaContainers[i].style.width = newWidth + "%";
     }
   }
-
 
   changePizzaSizes(size);
 
@@ -508,38 +494,34 @@ function logAverageFrame(times) { // times is the array of User Timing measureme
 
 // Moves the sliding background pizzas based on scroll position
 
+// Optimization1: using getElementByClass() for mover class instead of querySelectorAll() to improve FPS on scroll because
+// querySelectorAll returns a static NodeList (gets all tags, classes even when we don't need them),
+// while getElementByClass() returns a live NodeList (gets only what we need at X moment/situation)
+// https://www.nczonline.net/blog/2010/09/28/why-is-getelementsbytagname-faster-that-queryselectorall/
+// Optimization2: created variable items outside of updatePositions() function so it doesn't need to be invoked on every scroll
+var items = document.getElementsByClassName('mover');
 
+// Optimization5: creating variable outside of updatePositions() function so styleChange reads it beforehand and doesn't
+// create unnecessary layout iterations
+// READ: https://developers.google.com/web/fundamentals/performance/rendering/avoid-large-complex-layouts-and-layout-thrashing#avoid-forced-synchronous-layouts
+
+// Moves the sliding background pizzas based on scroll position
 function updatePositions() {
   frame++;
-  /* there was initially a variable assignment in the loop that used the scrollTop attribute to provide a value for the
-    change in the left position for the style of the pizza:
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5))
-    First of all, it wasn't necessary to assign a variable during
-    each loop, so that was taken out, but also, it turns out that the calculation itself did not depend on anything but the
-    counter, so I was able to do much of the calculation here initially. Specifically:
-    1) document.body.scrollTop is going to be identical every iteration of the loop -only differs each time
-    updatePositions() is called.
-    2) based on console log, the part of the calculation (i % 5) was only ever one of 5 values - which actually correlated to
-    the value of i
-  */
-  var sctop = document.body.scrollTop / 1250;
   window.performance.mark("mark_start_frame");
 
-  /* querySelector was replaced by getElementByClassName since the latter incurs less cost in terms of
-     browser speed - based on http://web.archive.org/web/20160108040024/http://jsperf.com/getelementbyid-vs-queryselector (page is currently
-      inaccessible)
-  */
-  var items = document.getElementsByClassName('mover');
-  /* the background pizza images, even on a very large screen (19XXpx wide) seems to display at most 32 images.
-     so it's unecessary to loop through all 200 elements on the screen, thus making much less repainting for each
-     loop and speeding up responsiveness.
-  */
-  for (var i = 0; i < 32; i++) {
-    /* variable declaration gone and the phase calculation as refactored out of the loop is incorporated into the style assignment
-      thus significally increasing responsiveness of the animation.
-    */
-    items[i].style.left = items[i].basicLeft + 100 * (Math.sin(sctop + i)) + 'px';
+  // Optimization3: created new variable outside of for loop to decrease access to items variable everytime the for loop runs
+  // saves minimum loading, scrolling time. Barely visible in the browser.
+  var cachedItems = items.length;
+  var scrollNow = document.body.scrollTop / 1250;
+
+  for (var i = 0; i < cachedItems; i++) {
+    var phase =  Math.sin(scrollNow + (i % 5));
+    // console.log(phase, document.body.scroll / 1250);
+    
+    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
   }
+
   // User Timing API to the rescue again. Seriously, it's worth learning.
   // Super easy to create custom metrics.
   window.performance.mark("mark_end_frame");
@@ -548,39 +530,17 @@ function updatePositions() {
     var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
     logAverageFrame(timesToUpdatePosition);
   }
-  /* as mentione below, this resets the variable once the animation is complete so that the next scroll event
-    will trigger the rAF again.
-  */
-  ticking = false;
 }
 
-// this was changed to run the onSCroll function for debouncing of scroll events
-window.addEventListener('scroll', onScroll, false);
-
-/* based on the information from http://www.html5rocks.com/en/tutorials/speed/animations/
-  this was needed to enable debouncing of the scroll event.  Based on the code, we are setting
-  the ticking variable false initially.  When a scoll event occurs, requestTieck() is executed
-  which checks if ticking is true or false.  If it's false, runs the updatePositions().
-  updatePositions runs and executes the animation using rAF, then sets ticking to false, that way when
-  the next scroll event happens, it will run the updatePositions again.  So, it seems that this is
-  primarily for preventing additional requestAnimationFrames from ocurring while another one is in progress
-*/
-function onScroll() {
-  requestTick();
-}
-
-function requestTick() {
-  if (!ticking) {
-    requestAnimationFrame(updatePositions);
-  }
-  ticking = true;
-}
+// runs updatePositions on scroll
+window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  // changed 200 to 35, so it renders 35 pizzas at a time at a 1440 x 900 screen
+  for (var i = 0; i < 50; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";

@@ -10,31 +10,37 @@ To get started, check out the repository and inspect the code.
 
 Some useful tips to help you get started:
 
-1. Check out the repository
-1. To inspect the site on your phone, you can run a local server
+Improvements Implemented:
 
-  ```bash
-  $> cd /path/to/your-project-folder
-  $> python -m SimpleHTTPServer 8080
-  ```
+Index.html
 
-1. Open a browser and visit localhost:8080
-1. Download and install [ngrok](https://ngrok.com/) to the top-level of your project directory to make your local server accessible remotely.
+1- Compressed pizzeria.jpg.
+2- Compressed profile picture.
+3- Compressed cam_be_like.jpg.
+4- Compressed 2048.png
+5- Inlined css.
+6- Removed request for google fonts and included the the required fonts in html.
+7- Minify index.html.
 
-  ``` bash
-  $> cd /path/to/your-project-folder
-  $> ./ngrok http 8080
-  ```
-
-1. Copy the public URL ngrok gives you and try running it through PageSpeed Insights! Optional: [More on integrating ngrok, Grunt and PageSpeed.](http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/)
-
-Profile, optimize, measure... and then lather, rinse, and repeat. Good luck!
+#### How To Run it:
+double click on index.html
 
 #### Part 2: Optimize Frames per Second in pizza.html
 
-To optimize views/pizza.html, you will need to modify views/js/main.js until your frames per second rate is 60 fps or higher. You will find instructive comments in main.js. 
+1- Edit main.js file so the resizing of the pizzas happens in less than 5 ms and the scrolling runs at 60 FPS
 
-You might find the FPS Counter/HUD Display useful in Chrome developer tools described here: [Chrome Dev Tools tips-and-tricks](https://developer.chrome.com/devtools/docs/tips-and-tricks).
+2- Simplify the function resizePizzas so it doesn't trigger forced synchronous layout (FSL). The pizzas width simply gets set to a certain percentage of the original image size, depending on the slider position.
+
+3- Changed updatePositions so it doesn't trigger FSL by first getting scrollTop and then updating all elements later.
+
+4- Updated querySelectorAll("#mover") to getElementsByClassName("mover") so it doesn't have to recalculate on every iteration.
+
+5- replace querySelector with getElementById.
+
+#### How To Run it:
+1- Go to project folder -> views folder -> open pizza.html
+
+2- Right click on pizza.html window, select inspect, go to console to view time to generate layout and paint in miliseconds (ms)
 
 ### Optimization Tips and Tricks
 * [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
