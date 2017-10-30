@@ -499,10 +499,10 @@ function updatePositions() {
   window.performance.mark("mark_start_frame");
 
   var cachedItems = items.length;
-  var scrollNow = document.documentElement.scrollTop / 1250;
- var phase =  Math.sin(scrollNow + (i % 5));
+  var top = (document.body.scrollTop || document.documentElement.scrollTop) / 1250;
+ 
   for (var i = 0; i < cachedItems; i++) {
-   
+   var phase =  Math.sin(top + i % 5);
     // console.log(phase, document.body.scroll / 1250);
     
     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
@@ -526,11 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var cols = 8;
   var s = 256;
   // changed 200 to 35, so it renders 35 pizzas at a time at a 1440 x 900 screen
-  var elem = document.createElement('img');
+ 
   var movingPizzas = document.getElementById('movingPizzas1');
 
   for (var i = 0; i < 50; i++) {
-  
+  var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
